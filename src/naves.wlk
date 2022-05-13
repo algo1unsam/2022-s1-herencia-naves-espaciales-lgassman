@@ -2,10 +2,24 @@ class Nave {
 
 	var property velocidad = 0
 	
-	method propulsar() {
-		velocidad = (velocidad + 20000).min(300000) 
+	method aumentarVelocidad(_cuanto) {
+		velocidad = (velocidad  + _cuanto).min(300000)
 	}
 	
+	method preparar() {
+		self.aumentarVelocidad(15000)
+	}
+	
+	method propulsar() {
+		self.aumentarVelocidad(20000) 
+	}
+	
+	method encontrarEnemigo() {
+		self.recibirAmenaza()
+		self.propulsar()
+	}
+	
+	method 	recibirAmenaza()
 }
 
 
@@ -17,11 +31,29 @@ class NaveDeCarga inherits Nave {
 
 	method excedidaDeVelocidad() = velocidad > 100000
 
-	method recibirAmenaza() {
+	override method recibirAmenaza() {
 		carga = 0
 	}
 		
 }
+ 
+ class NaveDeCargaRadioactiva inherits NaveDeCarga {
+ 	var property sellada = false
+ 	
+ 	method sellarAlVacio() {
+ 		sellada = true
+ 		velocidad = 0		
+ 	}
+ 	
+ 	override method recibirAmenaza() {
+ 		self.sellarAlVacio()
+ 	}
+ 	
+ 	override method preparar() {
+ 		self.sellarAlVacio()
+ 		super()
+ 	}
+ }
 
 class NaveDePasajeros inherits Nave {
 
@@ -34,7 +66,7 @@ class NaveDePasajeros inherits Nave {
 
 	method estaEnPeligro() = velocidad > self.velocidadMaximaLegal() or alarma
 
-	method recibirAmenaza() {
+	override method recibirAmenaza() {
 		alarma = true
 	}
 }
@@ -51,23 +83,45 @@ class NaveDeCombate inherits Nave {
 
 	method estaInvisible() = velocidad < 10000 and modo.invisible()
 
-	method recibirAmenaza() {
+	override method recibirAmenaza() {
 		modo.recibirAmenaza(self)
+	}
+	
+	override method preparar() {
+		super()
+		modo.preparar(self)
 	}
 
 }
 
-object reposo {
+class EstadoDeNaveCombate {
+
+	method preparar(nave) {
+		nave.emitirMensaje(self.mensajeDePreparacion())
+		nave.modo(ataque)
+	}
+	
+	method mensajeDePreparacion() 
+	
+}
+
+
+object reposo inherits EstadoDeNaveCombate {
 
 	method invisible() = false
 
 	method recibirAmenaza(nave) {
 		nave.emitirMensaje("¡RETIRADA!")
 	}
+		
+	override method mensajeDePreparacion() {
+		return "Saliendo en misión"
+	}
+	
 
 }
 
-object ataque {
+object ataque inherits EstadoDeNaveCombate {
 
 	method invisible() = true
 
@@ -75,5 +129,9 @@ object ataque {
 		nave.emitirMensaje("Enemigo encontrado")
 	}
 
+	override method mensajeDePreparacion() {
+		return "Volviendo a la base"
+	}
 }
+
 

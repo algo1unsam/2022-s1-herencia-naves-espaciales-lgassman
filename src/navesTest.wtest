@@ -39,7 +39,10 @@ describe "Nave de pasajeros" {
 	const naveSinPasajeros = new NaveDePasajeros()
 	const naveConPasajeros = new NaveDePasajeros(cantidadDePasajeros = 296, velocidad = 290000)
 
-
+	test "preparar" {
+		naveConPasajeros.preparar()
+		assert.equals(300000, naveConPasajeros.velocidad())
+	}
 	test "propulsar" {
 		naveConPasajeros.propulsar()
 		assert.equals(300000, naveConPasajeros.velocidad())	
@@ -63,6 +66,12 @@ describe "Nave de pasajeros" {
 
 	test "recibir amenaza" {
 		naveSinPasajeros.recibirAmenaza()
+		assert.that(naveSinPasajeros.alarma())
+	}
+	
+	test "encontrar enemigo" {
+		naveSinPasajeros.encontrarEnemigo()
+		assert.equals(20000, naveSinPasajeros.velocidad())
 		assert.that(naveSinPasajeros.alarma())
 	}
 
@@ -95,5 +104,37 @@ describe "Nave de combate" {
 		naveEnAtaque.recibirAmenaza()
 		assert.equals("Enemigo encontrado", naveEnAtaque.ultimoMensaje())
 	}
+	
+	test "preparar en reposo" {
+		naveEnReposo.preparar()
+		assert.equals(15000, naveEnReposo.velocidad())
+		assert.equals(ataque, naveEnReposo.modo())
+		assert.equals("Saliendo en misión", naveEnReposo.ultimoMensaje())
+	}
+	
+	test "preparar en ataque" {
+		naveEnAtaque.preparar()
+		assert.equals(15000, naveEnAtaque.velocidad())
+		assert.equals("Volviendo a la base", naveEnAtaque.ultimoMensaje())
+	}
 }
 
+
+describe "Nave de carga radioactiva" {
+	
+	const naveRadioactiva = new NaveDeCargaRadioactiva(carga=5000, velocidad=10000)
+	
+	test "recibir amenaza" {
+		naveRadioactiva.recibirAmenaza()
+		assert.that(naveRadioactiva.sellada())
+		assert.equals(0,naveRadioactiva.velocidad())
+	}
+	
+	test "preparar" {
+		naveRadioactiva.preparar()
+		assert.that(naveRadioactiva.sellada())
+		assert.equals(15000, naveRadioactiva.velocidad())
+		
+	}
+	
+}
